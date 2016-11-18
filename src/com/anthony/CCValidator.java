@@ -86,16 +86,16 @@ public class CCValidator extends JFrame {
         // Create boolean to check if the current number should be doubled
         boolean doubleThis = true;
         // Start digit check
-        if (type.equalsIgnoreCase("Visa")) {
+        if (type.equalsIgnoreCase("Visa")) { // works
             if (cardNumArray[0] == '4') {
                 checkStartDigit = true;
             }
-        } else if (type.equalsIgnoreCase("Mastercard")) {
+        } else if (type.equalsIgnoreCase("Mastercard")) { // works
             if (cardNumArray[0] == '5') {
                 checkStartDigit = true;
             }
-        } else if (type.equalsIgnoreCase("AmEx")) {
-            if (cardNumArray[0] == '3' && (cardNumArray[2] == '7')) {
+        } else if (type.equalsIgnoreCase("AmEx")) { // Test implementation
+            if (cardNumArray[0] == '3' && (cardNumArray[1] == '7')) {
                 checkStartDigit = true;
             }
         } else {
@@ -103,6 +103,8 @@ public class CCValidator extends JFrame {
         }
         // Length check
         if (cardNumArray.length == 16){
+            checkLength = true;
+        } else if (type.equalsIgnoreCase("AmEx") && cardNumArray.length == 15) {
             checkLength = true;
         }
         // Check digit check- Number addition
