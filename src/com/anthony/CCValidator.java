@@ -3,6 +3,9 @@ package com.anthony;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.Objects;
 
 public class CCValidator extends JFrame {
     private JTextField tbxCardNumberInput;
@@ -10,27 +13,48 @@ public class CCValidator extends JFrame {
     private JButton btnQuit;
     private JPanel rootPanel;
     private JLabel lblValidMessage;
+    private JComboBox cbxCardType;
     private String ccNumber;
+
+    private boolean resetMessageOnKeyPress = false;
+
+    private final String VISA = "Visa";
+    private final String MASTERCARD = "Mastercard";
+    private final String AMEX = "American Express";
 
     CCValidator() {
         setContentPane(rootPanel);
         pack();
-        setSize(500, 500);
+//        setSize(500, 500); // Sets window size
         setTitle("Credit Validation");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
+
+        cbxCardType.addItem(VISA);
+        cbxCardType.addItem(MASTERCARD);
+        cbxCardType.addItem(AMEX);
 
         // btnValidate click
         btnValidate.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String ccNumber = tbxCardNumberInput.getText();
-                boolean valid = isVisaCreditCardValid(ccNumber);
+                boolean valid = false;
+                if (cbxCardType.getSelectedItem().equals(VISA)){
+                    valid = isCreditCardValid(ccNumber, "Visa");
+                } else if (cbxCardType.getSelectedItem().equals(MASTERCARD)){
+                    valid = isCreditCardValid(ccNumber, "Mastercard");
+                } else if (cbxCardType.getSelectedItem().equals(AMEX)){
+                    valid = isCreditCardValid(ccNumber, "AmEx");
+                } else {
+                    valid = false;
+                }
                 if (valid) {
                     lblValidMessage.setText("Credit card number is valid");
                 } else {
-                    lblValidMessage.setText("Credit card numer is not valid");
+                    lblValidMessage.setText("Credit card number is not valid");
                 }
+                resetMessageOnKeyPress = false;
             }
         });
         btnQuit.addActionListener(new ActionListener() {
@@ -39,9 +63,20 @@ public class CCValidator extends JFrame {
                 System.exit(0);
             }
         });
+
+        tbxCardNumberInput.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                super.keyTyped(e);
+                if (resetMessageOnKeyPress) {
+                    lblValidMessage.setText("~ Valid or not valid will be displayed here ~");
+                    resetMessageOnKeyPress = false;
+                }
+            }
+        });
     }
 
-    private boolean isVisaCreditCardValid(String cardNumber) {
+    private boolean isCreditCardValid(String cardNumber, String type) {
         // Booleans to check validity
         boolean checkDigit = false;
         boolean checkLength = false;
@@ -51,10 +86,21 @@ public class CCValidator extends JFrame {
         // Create boolean to check if the current number should be doubled
         boolean doubleThis = true;
         // Start digit check
-        if (cardNumArray[0] == '4'){
-            checkStartDigit = true;
+        if (type.equalsIgnoreCase("Visa")) {
+            if (cardNumArray[0] == '4') {
+                checkStartDigit = true;
+            }
+        } else if (type.equalsIgnoreCase("Mastercard")) {
+            if (cardNumArray[0] == '5') {
+                checkStartDigit = true;
+            }
+        } else if (type.equalsIgnoreCase("AmEx")) {
+            if (cardNumArray[0] == '3' && (cardNumArray[2] == '7')) {
+                checkStartDigit = true;
+            }
+        } else {
+            checkStartDigit = false;
         }
-
         // Length check
         if (cardNumArray.length == 16){
             checkLength = true;
